@@ -10,8 +10,7 @@ We do not prepare, file, or advise on tax returns.
 
 - Reads one card statement (a CSV, or text pasted from a PDF) for one month.
 - Matches each charge to a receipt by vendor, exact amount and date.
-- Never guesses. A charge with no receipt is listed as "Receipt not found".
-- Tags each charge with a plain bookkeeping label that you can change.
+- Lists possible matches for you to confirm and never counts them on its own. A charge with no receipt is listed as "Receipt not found".
 - Builds a packet folder, a zip, and a short email text that you paste and send yourself.
 
 It is bookkeeping and reporting only. It does not say what is deductible and it does not give tax advice. Ask your preparer anything about taxes.
@@ -36,7 +35,7 @@ Your files stay on your machine. Your mail provider and your AI model still see 
 - It handles the statement shapes it lists: a CSV export, or text pasted from a PDF statement. A PDF you drop in directly is read too, but an unusual statement can be misread.
 - If it misreads a line, it says so by asking you to check the parsed lines and the sum against your own statement. Please do check them.
 - It is bookkeeping only. It never gives tax advice. Ask your preparer anything about taxes.
-- Route A (connecting your mail through Composio) is not recommended until its UNVERIFIED items are resolved. Use Route B.
+- Route A (connecting your mail through Composio) is not recommended until its open safety questions are answered. Use Route B.
 
 ## License
 
