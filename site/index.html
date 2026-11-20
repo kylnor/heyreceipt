@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeyReceipt: a free month-end receipt helper</title>
+<meta name="description" content="A free helper that matches your card statement to receipts from your own email and builds a packet for review. Bookkeeping and reporting only.">
+<style>
+:root{--ink:#1f2a24;--paper:#f6f1e4;--sage:#3f6b57;--rust:#b4552d;--line:#d9d1bb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.6 Georgia,"Times New Roman",serif}
+main{max-width:40rem;margin:0 auto;padding:3rem 1.5rem 4rem}
+.tag{display:inline-block;font:600 .75rem/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);border:1.5px solid var(--rust);padding:.35rem .6rem;transform:rotate(-1.5deg)}
+h1{font-size:2.6rem;line-height:1.1;margin:1.2rem 0 .6rem;color:var(--sage)}
+.lede{font-size:1.25rem}
+h2{font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase;margin:2.5rem 0 .6rem;padding-bottom:.4rem;border-bottom:2px dashed var(--line)}
+ul{padding-left:1.2rem}
+li{margin:.4rem 0}
+.box{background:#fffdf6;border:1px solid var(--line);border-left:6px solid var(--sage);padding:.2rem 1.2rem;margin:1.5rem 0}
+.note{font-size:.9rem;color:#55604f;margin-top:3rem;border-top:1px solid var(--line);padding-top:1rem}
+.soon{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem}
+</style>
+</head>
+<body>
+<main>
+<span class="tag">Free skill, v0.1</span>
+<h1>HeyReceipt</h1>
+<p class="lede">Hand it your card statement and your receipts. It matches them up, tells you which charges it could not match, and builds a packet you or your bookkeeper can review.</p>
+
+<h2>What it does</h2>
+<ul>
+<li>Reads one card statement for one month.</li>
+<li>Matches each charge to a receipt by vendor, exact amount and date.</li>
+<li>Never guesses. A charge with no receipt is listed as "Receipt not found".</li>
+<li>Gives you a packet folder, a zip, and email text you send yourself.</li>
+</ul>
+
+<h2>How it gets your receipts</h2>
+<div class="box">
+<p><strong>Default (Route B):</strong> you save receipt emails into a folder on your own computer. No account is connected and no third party is involved.</p>
+</div>
+<p>An optional free Composio route (Route A) reads your Gmail for you. It is not recommended yet, because some safety questions about it are still unanswered.</p>
+
+<h2>Known limits</h2>
+<ul>
+<li>Tried on made-up data only. Not tested on real statements.</li>
+<li>Works with a CSV export or text pasted from a PDF statement. Please check its parsed lines against your own statement.</li>
+<li>Bookkeeping only. Ask your preparer anything about taxes.</li>
+</ul>
+
+<p><strong>We do not prepare, file, or advise on tax returns.</strong></p>
+
+<p class="soon">GitHub (coming soon)</p>
+
+<p class="note">HeyReceipt is an independent project and is not affiliated with 37signals or HEY.</p>
+</main>
+</body>
+</html>
