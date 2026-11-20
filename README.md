@@ -17,6 +17,8 @@ It is bookkeeping and reporting only. It does not say what is deductible and it 
 
 ## How it gets your receipts
 
+**A mail connector already in your session (offered first when found).** If your AI session already has a Gmail or Outlook connector, the skill can offer to use it. Your mail provider and AI provider already see that mail, nothing new is connected, and the skill only reads (it never sends or deletes). Whether a given connector can read attachments is not verified, so you may still save attachment files into a folder yourself. ChatGPT and OpenAI connectors may work if your session exposes mail tools, but that is unverified.
+
 **Route B (the default).** You save receipt emails into a folder on your own computer. No account is connected and no third party is involved. The skill reads only the files you put there.
 
 **Route A (not recommended yet).** A free Composio account reads your Gmail for you. This hands a copy of your mail-reading permission to a third party, and some safety questions about it are still unanswered. Use Route B for now.

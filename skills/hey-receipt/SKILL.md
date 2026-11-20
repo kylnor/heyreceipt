@@ -5,8 +5,6 @@ description: Free month-end helper. Matches a card statement to receipts found i
 
 # hey-receipt
 
-DRAFT. Not installed. Written for a generic user; nothing here is specific to one person, card, mailbox or machine.
-
 ## What this is, and is not
 
 Bookkeeping and reporting. It finds receipts, matches them to card statement lines, and lists what could not be matched. It does not prepare, file or advise on tax returns. It never says what is deductible, never maps spend to tax form lines, never says "tax-ready", "audit-proof", "IRS-compliant" or "maximize deductions". The user and their preparer decide everything tax-related.
@@ -15,7 +13,7 @@ If the user asks a tax question, say it is outside this skill and point them to 
 
 ## Data rules (non-negotiable)
 
-- The skill's own files (ledger, packet, settings) stay on the user's machine. No hosted storage, no upload to any service owned by the skill's author. Email content is still seen by the user's mail provider and by whatever AI model runs this skill, and on Route A also by Composio. Say so plainly at setup.
+- The skill's own files (ledger, packet, settings) stay on the user's machine. No hosted storage, no upload to any service owned by the skill's author. Email content is still seen by the user's mail provider and by whatever AI model runs this skill, on Route A also by Composio, and when a mail connector is used, also by the connector's provider. Say so plainly at setup.
 - Output goes to a local folder the user chooses (Step 1, question 1). Nothing is sent to anyone. The user attaches and sends the packet themselves.
 - Never print or store full card numbers. Last 4 digits only. Masking rule, the one rule for digit runs everywhere in this skill: keep the printed vendor text as it appears on the statement, but write any run of 8 or more digits (digits side by side, or four-digit groups joined by single spaces or hyphens, such as 1234 5678 9012 3456) as X for every digit except the last 4. A reference ending 884100331755 becomes XXXXXXXX1755. The masked form is used in every output and saved file the skill writes: ledger, totals, worksheet, cover, email text, notes, file names and `hey-receipt.json`. Tell the user once per run that a run was masked, and on which line. Vendor documents (receipts) are attached verbatim and never edited, so masking does not apply inside them. Instead each receipt is scanned for a run of 13 to 19 digits that passes the Luhn check, which is how a real card number behaves (Step 2 item 3). Order and invoice numbers that fail the check are not flagged. If a card-like number is found, the user is asked before that file goes into the packet.
 - Do not store credentials in the output folder or the packet. On Route B there are no credentials at all.
@@ -41,7 +39,7 @@ Everything lives under the folder chosen in question 1. This is the one place th
     MM-YYYY-LAST4-receipts.zip
 ```
 
-- `hey-receipt.json`: saved answers (output folder path, entity name, bookkeeper name, cards, route, that the data-handling notice was okayed, the receipt-to-card answers from Step 2 item 3, and which file the user kept when two receipt files were duplicates, Route B step 9). Personal data. Never inside `packet/`, never in the zip.
+- `hey-receipt.json`: saved answers (output folder path, entity name, bookkeeper name, cards, email source (connector, Route B or Route A), that the data-handling notice was okayed, the receipt-to-card answers from Step 2 item 3, and which file the user kept when two receipt files were duplicates, Route B step 9). Personal data. Never inside `packet/`, never in the zip.
 - If the user chose a folder other than the default (a folder named `hey-receipt` in their Documents folder), also write a one-line file `hey-receipt-folder.txt` holding that path into the default folder (create it if needed), so Step 1 can find the real folder next time. Write it once, at question 7, not earlier. It holds a path only, and it is the one file the skill writes outside the chosen folder.
 - `inbox/receipts/`: receipt files the user drops in (.eml, .pdf, .png, .jpg, .html, .txt).
 - `inbox/statements/`: card statements (.pdf, .csv, or .txt: text copied out of a PDF statement and pasted into a file).
@@ -69,14 +67,27 @@ Order of questions:
 3. The first run. If more than one card is saved, ask which card this first run is for. Then, in a separate message, ask which statement month (for example last month). The answers are used for the first run only and are not saved; Step 2 does not ask them again. One run covers one card and one month; never batch months or cards.
 4. Entity name: the name to print on the cover (for example the business name, or the user's own name for a sole proprietor). Ask it before it is used anywhere. Name only: no tax ID, EIN or SSN.
 5. Bookkeeper name. Optional; the user can say skip. Used only for the greeting in `email-body.txt`. The skill never sends anything and always makes both the zip and the email text, so it does not ask for the bookkeeper's email address or delivery method.
-6. Email access: "Use the default (Route B: you save receipt emails into a local folder, no account connected, no third party), or the optional upgrade (Route A: your own Composio account reads your Gmail for you)? Default is Route B." If they pick A, read them the Route A gate before anything else. If they hesitate, use B.
-7. Confirm back in one line: output folder, entity name, source (route), bookkeeper if any, and for the first run its card last 4 and month. Wait for yes. The Route B steps run only after this yes, in the order given there (steps 2 to 4 are skipped when `inbox/` already has files; steps 6 and 9 are policy, not actions). Write `hey-receipt-folder.txt` here if the folder is not the default.
+6. Email access. First do the connector check in "Option 0" under Email access below, before asking. If a Gmail or Outlook connector is available, ask: "Your session already has a mail connector for [Gmail or Outlook]. Use it (read-only, nothing new is connected), or use Route B (you save receipt emails into a local folder, no account connected, no third party)? Route A, the optional Composio upgrade, is also possible but not recommended yet." Say the Option 0 notes before they answer. If none is found, ask: "Use the default (Route B: you save receipt emails into a local folder, no account connected, no third party), or the optional upgrade (Route A: your own Composio account reads your Gmail for you)? Default is Route B." If they pick A, read them the Route A gate before anything else. If they hesitate, use B.
+7. Confirm back in one line: output folder, entity name, source (the connector by name, Route B, or Route A), bookkeeper if any, and for the first run its card last 4 and month. Wait for yes. The Route B steps run only after this yes (when a connector is the source, only Route B step 4 for attachments, and steps 5 to 7 and 9, apply, per Option 0), in the order given there (steps 2 to 4 are skipped when `inbox/` already has files; steps 6 and 9 are policy, not actions). Write `hey-receipt-folder.txt` here if the folder is not the default.
 
 ## Email access
 
-Route B is the default. Route A is an optional upgrade.
+Order of offer: Option 0 (a connector already in the session) first, then Route B, then Route A. Route B is still the default when no connector is detected or the user hesitates. Route A is an optional upgrade, last, and still gated "not recommended yet".
 
-### Route B (default): your own folder, no account connected
+### Option 0: a mail connector already in your session
+
+Before asking the email-access question (Step 1, question 6), check whether Gmail or Outlook mail-search tools are already available in this session. In Claude Code, MCP tools can be deferred behind tool search, so search for them (for example search the tool list for "gmail", "outlook", "mail", "email") before concluding none exist. Not seeing them in the starting tool list is not proof they are absent. How a skill should detect tools is not documented; this is an instruction to the agent, not a verified feature.
+
+If one is available, offer it first and say plainly:
+
+- The user's mail provider and AI provider already see this mail. Nothing new is connected and no new account or credential is created.
+- The skill only reads mail through it. It never sends, drafts, replies, forwards or deletes, even if the connector can.
+- Whether the connector can open attachments (a vendor's PDF invoice) is not verified per connector. Anthropic's help center and its developer docs pages disagree about Gmail, and for Outlook neither says. If the connector cannot read attachments, or you cannot tell, use Route B step 4 for attachments: the user saves those files into `inbox/receipts/`.
+- Do not claim ChatGPT or OpenAI connectors work. They may work if the session exposes mail tools, but that is unverified (the OpenAI connector pages could not be read).
+
+If the user hesitates, or no connector is found, use Route B. With a connector as the source, still do Route B step 1 and steps 5 to 7 and 9; steps 2 to 4 are replaced by searching through the connector (Step 2 item 3), except step 4 for any attachment the connector cannot read.
+
+### Route B (default when nothing is detected): your own folder, no account connected
 
 No third party is connected and no credential is shared. The skill never logs in to the user's mail. It reads only files the user puts in `inbox/`. Menu names and click paths differ by mail provider and change over time, and the provider help pages were not fetched for this draft, so every provider click path below is UNVERIFIED: the agent should describe the goal and let the user find the button in their own mail, not claim a path it has not seen.
 
@@ -177,7 +188,7 @@ Run for one card and one statement month at a time. Unless just answered in Step
    - Pasted text is a supported statement input. A .txt file in `inbox/statements/` is a statement pasted from a PDF; parse it the same way as a PDF. Then show the user every parsed line (date, vendor, amount, one per row) and their sum, and have them confirm before any matching (see item 2). Pasted text can parse badly (wrapped lines, mixed date formats, trailing references); if it does not look like a statement the skill can parse, say so and ask for the issuer's PDF or CSV instead.
    - If the statement is a PDF, or pasted text that shows a printed net, write the printed net and any printed section subtotals into `totals.txt` in the same folder. A CSV, or pasted text with no printed net, has none: write "net: computed from rows" in `totals.txt` and tell the user so.
 2. Check the ledger. For a PDF or pasted text with a printed net, row amounts must sum to the printed net in `totals.txt`, and where printed subtotals exist the charge rows must sum to the purchases subtotal and the credit rows to the credits subtotal; if not, stop and fix the transcription before matching. For a CSV the net is computed from the rows, so the sum cannot prove the transcription and must not be reported as a check of the statement; the item 7 check on a CSV only guards against a wrong status bucket or a missing file. Either way, ask the user to confirm the line count (charges and credits, after joining wrapped lines) against their own statement or their card issuer's website, and wait for the answer. Then, in a separate message, ask them to confirm the net. For pasted text, the parsed lines and sum already shown under item 1 replace these two questions: ask one question, "Do these lines and this sum match your statement?", and wait. Then, in a separate message, show the three largest rows by amount, ignoring sign (vendor, date, amount), and ask whether each matches their statement, because a sum alone cannot catch offsetting errors. If the user says one is wrong, correct it from the statement, redo the sum check, and ask again. For a CSV exported from the issuer, this confirms the transcription only, not the statement itself.
-3. Search for each charge: in `inbox/receipts/` (Route B), and if Route A is set up, the connected mailbox too. Use vendor name variants, amount, and a date window of 7 days before and after the transaction date (receipts often lag). Save found documents as-is into `found/`. De-duplicate as in Route B step 9. Scan each document you intend to attach for a run of 13 to 19 digits that passes the Luhn check (Data rules). If one is found, do not copy it anywhere, tell the user which file, and ask whether to send that file as it is. If the user says no, the file is not put in `packet/` and the line is listed as "Receipt not found" with the note "document withheld by user". Never edit the document.
+3. Search for each charge: in `inbox/receipts/` (Route B), and if a mail connector (Option 0) or Route A is in use, the connected mailbox too, searching only (never sending or deleting). Use vendor name variants, amount, and a date window of 7 days before and after the transaction date (receipts often lag). Save found documents as-is into `found/`. De-duplicate as in Route B step 9. Scan each document you intend to attach for a run of 13 to 19 digits that passes the Luhn check (Data rules). If one is found, do not copy it anywhere, tell the user which file, and ask whether to send that file as it is. If the user says no, the file is not put in `packet/` and the line is listed as "Receipt not found" with the note "document withheld by user". Never edit the document.
 
    One receipt, one line. A receipt is never matched to more than one statement line unless the user confirms it covers several (ask once per receipt). Two cases:
    - Duplicate charge: when two or more identical statement lines (same vendor, date and amount) share one receipt, exactly one line, the first in statement order, takes the receipt (HAVE). The others are listed as "Receipt not found" with the note "possible duplicate charge" for the user to resolve. Never count a single receipt as covering a double charge.
@@ -253,11 +264,3 @@ Do not say: tax-ready, audit-proof, IRS-compliant, maximize deductions, never mi
 - If it misreads a line, it says so by asking you to check the parsed lines and the sum against your own statement. Please do check them.
 - It is bookkeeping only. It never gives tax advice. Ask your preparer anything about taxes.
 - Route A (connecting your mail through Composio) is not recommended until its UNVERIFIED items are resolved. Use Route B.
-
-## Open items before release
-
-- Route A stays gated: the Gmail verification status of Composio's managed app and the default scopes it requests are UNVERIFIED. Route B is the default until both are confirmed from a fetched source.
-- Decisions left open: the "All N lines are accounted for" sentence in `email-body.txt` reads oddly when many lines are unmatched; "Still correct?" at the start of a later run confirms a several-item read-back in one question; the receipt file name cut at 30 characters can end mid-word.
-- Trademark search for HeyReceipt and the HEY mark; not cleared.
-- No statement parser exists; the ledger is transcribed from the statement by the model. Step 2 asks the user to confirm line count, net and the largest rows.
-- Provider click paths for Route B (Gmail, Outlook search, filter and forwarding menus) are UNVERIFIED and need to be checked against the providers' own help pages.
